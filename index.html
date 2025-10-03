@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NeuroShield - Smart Hypertension Management</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      animation: fadeIn 0.5s ease-in;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .header {
+      text-align: center;
+      color: white;
+      margin-bottom: 30px;
+    }
+
+    .header h1 {
+      font-size: 3em;
+      font-weight: 700;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+      margin-bottom: 10px;
+    }
+
+    .header p {
+      font-size: 1.2em;
+      opacity: 0.95;
+    }
+
+    .card {
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      margin-bottom: 20px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+      transition: transform 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+    }
+
+    .card h2 {
+      color: #667eea;
+      margin-bottom: 20px;
+      font-size: 1.8em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .input-group {
+      margin-bottom: 20px;
+    }
+
+    .input-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: #333;
+      font-weight: 600;
+    }
+
+    .input-group input,
+    .input-group select {
+      width: 100%;
+      padding: 12px 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: 1em;
+      transition: border-color 0.3s;
+    }
+
+    .input-group input:focus,
+    .input-group select:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    .input-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+    }
+
+    .btn {
+      padding: 12px 30px;
+      border: none;
+      border-radius: 10px;
+      font-size: 1.1em;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin: 5px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: scale(1.05);
+      box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+      color: white;
+    }
+
+    .btn-success:hover {
+      transform: scale(1.05);
+      box-shadow: 0 5px 20px rgba(56, 239, 125, 0.4);
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+      color: white;
+    }
+
+    .btn-danger:hover {
+      transform: scale(1.05);
+      box-shadow: 0 5px 20px rgba(235, 51, 73, 0.4);
+    }
+
+    .risk-badge {
+      display: inline-block;
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 1.2em;
+      margin: 10px 0;
+    }
+
+    .risk-low {
+      background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+      color: white;
+    }
+
+    .risk-moderate {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      color: white;
+    }
+
+    .risk-high {
+      background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+      color: white;
+    }
+
+    .log-entry {
+      background: #f5f5f5;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .log-entry.taken {
+      border-left: 5px solid #38ef7d;
+    }
+
+    .log-entry.skipped {
+      border-left: 5px solid #f45c43;
+    }
+
+    .recommendations {
+      background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+      padding: 20px;
+      border-radius: 15px;
+      margin-top: 20px;
+    }
+
+    .recommendations ul {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .recommendations li {
+      padding: 10px 0;
+      padding-left: 30px;
+      position: relative;
+    }
+
+    .recommendations li:before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      color: #38ef7d;
+      font-weight: bold;
+      font-size: 1.5em;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .stat-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 15px;
+      text-align: center;
+    }
+
+    .stat-card h3 {
+      font-size: 2.5em;
+      margin-bottom: 5px;
+    }
+
+    .stat-card p {
+      opacity: 0.9;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .icon {
+      font-size: 1.5em;
+    }
+
+    .progress-bar {
+      background: #e0e0e0;
+      border-radius: 10px;
+      height: 20px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #11998e 0%, #38ef7d 100%);
+      transition: width 0.5s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 0.9em;
+    }
+
+    .chart-container {
+      margin-top: 20px;
+      padding: 20px;
+      background: #f9f9f9;
+      border-radius: 15px;
+    }
+
+    @media (max-width: 768px) {
+      .header h1 {
+        font-size: 2em;
+      }
+      .input-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🧠 NeuroShield</h1>
+      <p>Smart Hypertension Management & Cardiovascular Risk Prevention</p>
+    </div>
+
+    <!-- Onboarding Section -->
+    <div class="card" id="onboarding">
+      <h2><span class="icon">👤</span> Patient Profile</h2>
+      <div class="input-row">
+        <div class="input-group">
+          <label>Age</label>
+          <input type="number" id="age" placeholder="Enter age" min="1" max="120">
+        </div>
+        <div class="input-group">
+          <label>Sex</label>
+          <select id="sex">
+            <option value="">Select</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="input-row">
+        <div class="input-group">
+          <label>Weight (kg)</label>
+          <input type="number" id="weight" placeholder="Enter weight" step="0.1">
+        </div>
+        <div class="input-group">
+          <label>Height (cm)</label>
+          <input type="number" id="height" placeholder="Enter height">
+        </div>
+      </div>
+
+      <div class="input-row">
+        <div class="input-group">
+          <label>Do you smoke?</label>
+          <select id="smoking">
+            <option value="no">No</option>
+            <option value="yes">Yes</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label>Alcohol consumption</label>
+          <select id="alcohol">
+            <option value="no">No</option>
+            <option value="moderate">Moderate</option>
+            <option value="heavy">Heavy</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="input-row">
+        <div class="input-group">
+          <label>Do you have diabetes?</label>
+          <select id="diabetes">
+            <option value="no">No</option>
+            <option value="yes">Yes</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label>Family history of heart disease?</label>
+          <select id="family">
+            <option value="no">No</option>
+            <option value="yes">Yes</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label>Physical activity level</label>
+        <select id="activity">
+          <option value="sedentary">Sedentary</option>
+          <option value="light">Light</option>
+          <option value="moderate">Moderate</option>
+          <option value="active">Active</option>
+        </select>
+      </div>
+
+      <div class="input-group">
+        <label><strong>Have you been diagnosed with hypertension?</strong></label>
+        <select id="hypertension">
+          <option value="">Select</option>
+          <option value="no">No</option>
+          <option value="yes">Yes</option>
+        </select>
+      </div>
+
+      <button class="btn btn-primary" onclick="submitProfile()">Continue →</button>
+    </div>
+
+    <!-- Non-Hypertensive Path -->
+    <div class="card hidden" id="nonHypertensiveSection">
+      <h2><span class="icon">💚</span> Your Cardiovascular Health</h2>
+      <div id="riskDisplay"></div>
+      
+      <div class="recommendations">
+        <h3>🎯 Personalized Recommendations</h3>
+        <ul id="recommendationsList"></ul>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <h3 id="bmiDisplay">--</h3>
+          <p>BMI</p>
+        </div>
+        <div class="stat-card">
+          <h3>6-12</h3>
+          <p>Months until next check</p>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" onclick="resetApp()" style="margin-top: 20px;">Start New Assessment</button>
+    </div>
+
+    <!-- Hypertensive Path -->
+    <div class="card hidden" id="hypertensiveSection">
+      <h2><span class="icon">🩺</span> Blood Pressure Monitoring</h2>
+      
+      <div class="input-row">
+        <div class="input-group">
+          <label>Systolic (mmHg)</label>
+          <input type="number" id="systolic" placeholder="e.g., 120">
+        </div>
+        <div class="input-group">
+          <label>Diastolic (mmHg)</label>
+          <input type="number" id="diastolic" placeholder="e.g., 80">
+        </div>
+      </div>
+      
+      <button class="btn btn-primary" onclick="logBP()">Log BP Reading</button>
+      
+      <div id="bpLog" style="margin-top: 20px;"></div>
+    </div>
+
+    <div class="card hidden" id="medicationSection">
+      <h2><span class="icon">💊</span> Medication Tracking</h2>
+      
+      <div class="input-group">
+        <label>Medication Name</label>
+        <input type="text" id="medName" placeholder="e.g., Amlodipine 5mg">
+      </div>
+
+      <div class="input-group">
+        <label>Time</label>
+        <input type="time" id="medTime">
+      </div>
+      
+      <div>
+        <button class="btn btn-success" onclick="medTaken()">✓ Taken</button>
+        <button class="btn btn-danger" onclick="medSkipped()">✗ Skipped</button>
+      </div>
+
+      <div style="margin-top: 20px;">
+        <h3>📊 Monthly Adherence</h3>
+        <div class="progress-bar">
+          <div class="progress-fill" id="adherenceBar" style="width: 0%;">0%</div>
+        </div>
+      </div>
+      
+      <div id="medLog" style="margin-top: 20px;"></div>
+
+      <div class="stats-grid" style="margin-top: 20px;">
+        <div class="stat-card">
+          <h3 id="takenCount">0</h3>
+          <p>Doses Taken</p>
+        </div>
+        <div class="stat-card">
+          <h3 id="skippedCount">0</h3>
+          <p>Doses Skipped</p>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" onclick="resetApp()" style="margin-top: 20px;">Start New Assessment</button>
+    </div>
+  </div>
+
+  <script>
+    const appData = {
+      bpReadings: [],
+      medLogs: [],
+      takenCount: 0,
+      skippedCount: 0
+    };
+
+    function submitProfile() {
+      const age = document.getElementById('age').value;
+      const sex = document.getElementById('sex').value;
+      const weight = document.getElementById('weight').value;
+      const height = document.getElementById('height').value;
+      const smoking = document.getElementById('smoking').value;
+      const alcohol = document.getElementById('alcohol').value;
+      const diabetes = document.getElementById('diabetes').value;
+      const family = document.getElementById('family').value;
+      const activity = document.getElementById('activity').value;
+      const hypertension = document.getElementById('hypertension').value;
+
+      if (!age || !sex || !weight || !height || !hypertension) {
+        alert('Please fill in all required fields!');
+        return;
+      }
+
+      const bmi = (weight / Math.pow(height / 100, 2)).toFixed(1);
+      
+      document.getElementById('onboarding').classList.add('hidden');
+
+      if (hypertension === 'no') {
+        showNonHypertensivePath(bmi, age, smoking, diabetes, family, activity, alcohol);
+      } else {
+        showHypertensivePath(bmi);
+      }
+    }
+
+    function showNonHypertensivePath(bmi, age, smoking, diabetes, family, activity, alcohol) {
+      const section = document.getElementById('nonHypertensiveSection');
+      section.classList.remove('hidden');
+
+      let riskScore = 0;
+      let riskLevel = 'Low';
+      let riskClass = 'risk-low';
+
+      if (bmi >= 25) riskScore += 1;
+      if (bmi >= 30) riskScore += 2;
+      if (age > 45) riskScore += 1;
+      if (age > 65) riskScore += 2;
+      if (smoking === 'yes') riskScore += 2;
+      if (diabetes === 'yes') riskScore += 2;
+      if (family === 'yes') riskScore += 1;
+      if (activity === 'sedentary') riskScore += 1;
+      if (alcohol === 'heavy') riskScore += 1;
+
+      if (riskScore >= 5) {
+        riskLevel = 'High';
+        riskClass = 'risk-high';
+      } else if (riskScore >= 3) {
+        riskLevel = 'Moderate';
+        riskClass = 'risk-moderate';
+      }
+
+      document.getElementById('riskDisplay').innerHTML = `
+        <p><strong>Your Cardiovascular Risk Level:</strong></p>
+        <div class="risk-badge ${riskClass}">${riskLevel} Risk</div>
+        <p style="margin-top: 10px; color: #666;">Based on your profile, we recommend regular monitoring and healthy lifestyle habits.</p>
+      `;
+
+      document.getElementById('bmiDisplay').textContent = bmi;
+
+      const recommendations = [
+        'Walk for 30 minutes daily or 5 days a week',
+        'Follow a heart-healthy diet (low sodium, rich in fruits & vegetables)',
+        'Practice stress management techniques (meditation, yoga)',
+        'Maintain a healthy weight',
+        'Limit alcohol consumption',
+        'Get 7-8 hours of quality sleep',
+        'Schedule regular BP check-ups every 6-12 months'
+      ];
+
+      const recList = document.getElementById('recommendationsList');
+      recList.innerHTML = recommendations.map(rec => `<li>${rec}</li>`).join('');
+    }
+
+    function showHypertensivePath(bmi) {
+      document.getElementById('hypertensiveSection').classList.remove('hidden');
+      document.getElementById('medicationSection').classList.remove('hidden');
+    }
+
+    function logBP() {
+      const systolic = document.getElementById('systolic').value;
+      const diastolic = document.getElementById('diastolic').value;
+
+      if (!systolic || !diastolic) {
+        alert('Please enter both systolic and diastolic values!');
+        return;
+      }
+
+      const timestamp = new Date().toLocaleString();
+      const reading = { systolic, diastolic, timestamp };
+      appData.bpReadings.push(reading);
+
+      const bpLog = document.getElementById('bpLog');
+      const entry = document.createElement('div');
+      entry.className = 'log-entry';
+      entry.innerHTML = `
+        <div>
+          <strong>${systolic}/${diastolic} mmHg</strong>
+          <div style="font-size: 0.9em; color: #666;">${timestamp}</div>
+        </div>
+        <div style="font-size: 1.5em;">${getBPEmoji(systolic, diastolic)}</div>
+      `;
+      bpLog.insertBefore(entry, bpLog.firstChild);
+
+      document.getElementById('systolic').value = '';
+      document.getElementById('diastolic').value = '';
+    }
+
+    function getBPEmoji(sys, dias) {
+      if (sys < 120 && dias < 80) return '💚';
+      if (sys < 130 && dias < 80) return '💛';
+      if (sys < 140 || dias < 90) return '🧡';
+      return '❤️';
+    }
+
+    function medTaken() {
+      logMedication(true);
+    }
+
+    function medSkipped() {
+      logMedication(false);
+    }
+
+    function logMedication(taken) {
+      const medName = document.getElementById('medName').value;
+      const medTime = document.getElementById('medTime').value;
+
+      if (!medName) {
+        alert('Please enter medication name!');
+        return;
+      }
+
+      const timestamp = new Date().toLocaleString();
+      const log = { medName, medTime, taken, timestamp };
+      appData.medLogs.push(log);
+
+      if (taken) {
+        appData.takenCount++;
+      } else {
+        appData.skippedCount++;
+      }
+
+      const medLog = document.getElementById('medLog');
+      const entry = document.createElement('div');
+      entry.className = `log-entry ${taken ? 'taken' : 'skipped'}`;
+      entry.innerHTML = `
+        <div>
+          <strong>${medName}</strong> ${medTime ? `at ${medTime}` : ''}
+          <div style="font-size: 0.9em; color: #666;">${timestamp}</div>
+        </div>
+        <div style="font-size: 1.5em;">${taken ? '✅' : '❌'}</div>
+      `;
+      medLog.insertBefore(entry, medLog.firstChild);
+
+      updateAdherence();
+      
+      document.getElementById('medName').value = '';
+      document.getElementById('medTime').value = '';
+    }
+
+    function updateAdherence() {
+      const total = appData.takenCount + appData.skippedCount;
+      const adherence = total > 0 ? Math.round((appData.takenCount / total) * 100) : 0;
+
+      document.getElementById('adherenceBar').style.width = adherence + '%';
+      document.getElementById('adherenceBar').textContent = adherence + '%';
+      document.getElementById('takenCount').textContent = appData.takenCount;
+      document.getElementById('skippedCount').textContent = appData.skippedCount;
+    }
+
+    function resetApp() {
+      location.reload();
+    }
+  </script>
+</body>
+</html>
