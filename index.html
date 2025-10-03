@@ -270,43 +270,11 @@
       font-size: 0.9em;
     }
 
-    .patient-selector {
-      background: white;
+    .chart-container {
+      margin-top: 20px;
       padding: 20px;
-      border-radius: 15px;
-      margin-bottom: 20px;
-      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-    }
-
-    .patient-card {
       background: #f9f9f9;
-      padding: 15px;
-      margin: 10px 0;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: all 0.3s;
-      border: 2px solid transparent;
-    }
-
-    .patient-card:hover {
-      background: #667eea15;
-      border-color: #667eea;
-      transform: translateX(5px);
-    }
-
-    .loading {
-      text-align: center;
-      padding: 40px;
-      color: white;
-      font-size: 1.2em;
-    }
-
-    .error {
-      background: #f45c43;
-      color: white;
-      padding: 15px;
-      border-radius: 10px;
-      margin: 20px 0;
+      border-radius: 15px;
     }
 
     @media (max-width: 768px) {
@@ -326,20 +294,9 @@
       <p>Smart Hypertension Management & Cardiovascular Risk Prevention</p>
     </div>
 
-    <!-- Loading State -->
-    <div class="loading" id="loading">
-      Loading patient data...
-    </div>
-
-    <!-- Patient Selection -->
-    <div class="card hidden" id="patientSelection">
-      <h2><span class="icon">👥</span> Select Patient</h2>
-      <div id="patientList"></div>
-    </div>
-
-    <!-- Manual Entry Option -->
-    <div class="card hidden" id="manualEntry">
-      <h2><span class="icon">👤</span> Manual Patient Entry</h2>
+    <!-- Onboarding Section -->
+    <div class="card" id="onboarding">
+      <h2><span class="icon">👤</span> Patient Profile</h2>
       <div class="input-row">
         <div class="input-group">
           <label>Age</label>
@@ -421,7 +378,7 @@
         </select>
       </div>
 
-      <button class="btn btn-primary" onclick="submitManualProfile()">Continue →</button>
+      <button class="btn btn-primary" onclick="submitProfile()">Continue →</button>
     </div>
 
     <!-- Non-Hypertensive Path -->
@@ -515,135 +472,35 @@
       bpReadings: [],
       medLogs: [],
       takenCount: 0,
-      skippedCount: 0,
-      patients: []
+      skippedCount: 0
     };
 
-    // Initialize app on load
-    window.addEventListener('DOMContentLoaded', async () => {
-      await loadPatientsFromJSON();
-    });
+    function submitProfile() {
+      const age = document.getElementById('age').value;
+      const sex = document.getElementById('sex').value;
+      const weight = document.getElementById('weight').value;
+      const height = document.getElementById('height').value;
+      const smoking = document.getElementById('smoking').value;
+      const alcohol = document.getElementById('alcohol').value;
+      const diabetes = document.getElementById('diabetes').value;
+      const family = document.getElementById('family').value;
+      const activity = document.getElementById('activity').value;
+      const hypertension = document.getElementById('hypertension').value;
 
-    async function loadPatientsFromJSON() {
-      try {
-        const response = await fetch('hypertension_dataset_part1.json');
-        if (!response.ok) {
-          throw new Error('JSON file not found');
-        }
-        
-        const data = await response.json();
-        appData.patients = data;
-
-        document.getElementById('loading').classList.add('hidden');
-        displayPatientList();
-      } catch (error) {
-        console.error('Note: JSON file not found, showing manual entry');
-        document.getElementById('loading').classList.add('hidden');
-        showManualEntry();
-      }
-    }
-
-    function displayPatientList() {
-      const patientList = document.getElementById('patientList');
-      const selection = document.getElementById('patientSelection');
-      
-      selection.classList.remove('hidden');
-
-      let html = '<div style="margin-bottom: 20px;"><button class="btn btn-primary" onclick="showManualEntry()">+ Add New Patient Manually</button></div>';
-      
-      appData.patients.forEach((patient, index) => {
-        const age = patient.age || 'N/A';
-        const sex = patient.sex || 'N/A';
-        const hypertension = patient.hypertension === 'yes' ? '🔴 Hypertensive' : '🟢 Non-Hypertensive';
-        
-        html += `
-          <div class="patient-card" onclick="selectPatient(${index})">
-            <strong>Patient ${patient.id || index + 1}</strong><br>
-            <small>Age: ${age} | Sex: ${sex} | ${hypertension}</small>
-          </div>
-        `;
-      });
-
-      patientList.innerHTML = html;
-    }
-
-    function showManualEntry() {
-      document.getElementById('patientSelection').classList.add('hidden');
-      document.getElementById('manualEntry').classList.remove('hidden');
-    }
-
-    function selectPatient(index) {
-      const patient = appData.patients[index];
-      document.getElementById('patientSelection').classList.add('hidden');
-      processPatientData(patient);
-    }
-
-    function processPatientData(patient) {
-      const bmi = calculateBMI(patient.weight, patient.height);
-
-      if (patient.hypertension === 'no') {
-        showNonHypertensivePath(
-          bmi,
-          patient.age,
-          patient.smoking,
-          patient.diabetes,
-          patient.family,
-          patient.activity,
-          patient.alcohol
-        );
-      } else {
-        showHypertensivePath(bmi);
-
-        if (patient.bpReadings && patient.bpReadings.length > 0) {
-          patient.bpReadings.forEach(reading => {
-            appData.bpReadings.push(reading);
-            displayBPEntry(reading);
-          });
-        }
-
-        if (patient.medications && patient.medications.length > 0) {
-          patient.medications.forEach(med => {
-            const log = {
-              medName: med.medName,
-              medTime: med.medTime || '',
-              taken: med.taken,
-              timestamp: med.timestamp || new Date().toLocaleString()
-            };
-            appData.medLogs.push(log);
-            if (med.taken) appData.takenCount++;
-            else appData.skippedCount++;
-            displayMedEntry(log);
-          });
-          updateAdherence();
-        }
-      }
-    }
-
-    function submitManualProfile() {
-      const patient = {
-        age: parseInt(document.getElementById('age').value),
-        sex: document.getElementById('sex').value,
-        weight: parseFloat(document.getElementById('weight').value),
-        height: parseFloat(document.getElementById('height').value),
-        smoking: document.getElementById('smoking').value,
-        alcohol: document.getElementById('alcohol').value,
-        diabetes: document.getElementById('diabetes').value,
-        family: document.getElementById('family').value,
-        activity: document.getElementById('activity').value,
-        hypertension: document.getElementById('hypertension').value
-      };
-
-      if (!patient.age || !patient.sex || !patient.weight || !patient.height || !patient.hypertension) {
+      if (!age || !sex || !weight || !height || !hypertension) {
         alert('Please fill in all required fields!');
         return;
       }
 
-      document.getElementById('manualEntry').classList.add('hidden');
-      processPatientData(patient);
-    }
+      const bmi = (weight / Math.pow(height / 100, 2)).toFixed(1);
+      
+      document.getElementById('onboarding').classList.add('hidden');
 
-    function calculateBMI(weight, height) {
-      return (weight / Math.pow(height / 100, 2)).toFixed(1);
+      if (hypertension === 'no') {
+        showNonHypertensivePath(bmi, age, smoking, diabetes, family, activity, alcohol);
+      } else {
+        showHypertensivePath(bmi);
+      }
     }
 
     function showNonHypertensivePath(bmi, age, smoking, diabetes, family, activity, alcohol) {
@@ -699,34 +556,6 @@
       document.getElementById('medicationSection').classList.remove('hidden');
     }
 
-    function displayBPEntry(reading) {
-      const bpLog = document.getElementById('bpLog');
-      const entry = document.createElement('div');
-      entry.className = 'log-entry';
-      entry.innerHTML = `
-        <div>
-          <strong>${reading.systolic}/${reading.diastolic} mmHg</strong>
-          <div style="font-size: 0.9em; color: #666;">${reading.timestamp}</div>
-        </div>
-        <div style="font-size: 1.5em;">${getBPEmoji(reading.systolic, reading.diastolic)}</div>
-      `;
-      bpLog.insertBefore(entry, bpLog.firstChild);
-    }
-
-    function displayMedEntry(log) {
-      const medLog = document.getElementById('medLog');
-      const entry = document.createElement('div');
-      entry.className = `log-entry ${log.taken ? 'taken' : 'skipped'}`;
-      entry.innerHTML = `
-        <div>
-          <strong>${log.medName}</strong> ${log.medTime ? `at ${log.medTime}` : ''}
-          <div style="font-size: 0.9em; color: #666;">${log.timestamp}</div>
-        </div>
-        <div style="font-size: 1.5em;">${log.taken ? '✅' : '❌'}</div>
-      `;
-      medLog.insertBefore(entry, medLog.firstChild);
-    }
-
     function logBP() {
       const systolic = document.getElementById('systolic').value;
       const diastolic = document.getElementById('diastolic').value;
@@ -739,14 +568,24 @@
       const timestamp = new Date().toLocaleString();
       const reading = { systolic, diastolic, timestamp };
       appData.bpReadings.push(reading);
-      displayBPEntry(reading);
+
+      const bpLog = document.getElementById('bpLog');
+      const entry = document.createElement('div');
+      entry.className = 'log-entry';
+      entry.innerHTML = `
+        <div>
+          <strong>${systolic}/${diastolic} mmHg</strong>
+          <div style="font-size: 0.9em; color: #666;">${timestamp}</div>
+        </div>
+        <div style="font-size: 1.5em;">${getBPEmoji(systolic, diastolic)}</div>
+      `;
+      bpLog.insertBefore(entry, bpLog.firstChild);
 
       document.getElementById('systolic').value = '';
       document.getElementById('diastolic').value = '';
     }
 
-    function getBPEmoji(sys, dias) {
-      if (sys < 120 && dias < 80) return '💚';
+    function getBPEmoji(sys, dias) {cl      if (sys < 120 && dias < 80) return '💚';
       if (sys < 130 && dias < 80) return '💛';
       if (sys < 140 || dias < 90) return '🧡';
       return '❤️';
@@ -779,9 +618,20 @@
         appData.skippedCount++;
       }
 
-      displayMedEntry(log);
-      updateAdherence();
+      const medLog = document.getElementById('medLog');
+      const entry = document.createElement('div');
+      entry.className = `log-entry ${taken ? 'taken' : 'skipped'}`;
+      entry.innerHTML = `
+        <div>
+          <strong>${medName}</strong> ${medTime ? `at ${medTime}` : ''}
+          <div style="font-size: 0.9em; color: #666;">${timestamp}</div>
+        </div>
+        <div style="font-size: 1.5em;">${taken ? '✅' : '❌'}</div>
+      `;
+      medLog.insertBefore(entry, medLog.firstChild);
 
+      updateAdherence();
+      
       document.getElementById('medName').value = '';
       document.getElementById('medTime').value = '';
     }
