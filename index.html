@@ -528,7 +528,7 @@
       try {
         const response = await fetch('hypertension_dataset_part1.json');
         if (!response.ok) {
-          throw new Error('Failed to load patient data');
+          throw new Error('JSON file not found');
         }
         
         const data = await response.json();
@@ -537,14 +537,9 @@
         document.getElementById('loading').classList.add('hidden');
         displayPatientList();
       } catch (error) {
-        console.error('Error loading patients:', error);
-        document.getElementById('loading').innerHTML = `
-          <div class="error">
-            <strong>⚠️ Error loading patient data</strong><br>
-            ${error.message}<br><br>
-            <button class="btn btn-primary" onclick="showManualEntry()">Enter Data Manually</button>
-          </div>
-        `;
+        console.error('Note: JSON file not found, showing manual entry');
+        document.getElementById('loading').classList.add('hidden');
+        showManualEntry();
       }
     }
 
