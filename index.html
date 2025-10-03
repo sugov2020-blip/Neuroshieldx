@@ -585,7 +585,8 @@
       document.getElementById('diastolic').value = '';
     }
 
-    function getBPEmoji(sys, dias) {cl      if (sys < 120 && dias < 80) return '💚';
+    function getBPEmoji(sys, dias) {
+      if (sys < 120 && dias < 80) return '💚';
       if (sys < 130 && dias < 80) return '💛';
       if (sys < 140 || dias < 90) return '🧡';
       return '❤️';
